@@ -1,6 +1,6 @@
 # DeckCraft roadmap: milestones and what's next
 
-> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-18 · **Change:** minor (native chart payloads stored in bounded ZIP members; previous: major, community PR wave 2026-10-14: PPTX corpus, presenter and show controls, review navigation, starter decks, Grid Options and New Window, WordArt gallery and handles, pen pressure; beta items 9 and 10 narrowed; duplicated rows and headers folded; previous: minor, core-workflow alpha gate added) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
+> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-20 · **Change:** minor (Estonian interface and language selection, #1066; previous: native chart payloads stored in bounded ZIP members; previous: major, community PR wave 2026-10-14: PPTX corpus, presenter and show controls, review navigation, starter decks, Grid Options and New Window, WordArt gallery and handles, pen pressure; beta items 9 and 10 narrowed; duplicated rows and headers folded; previous: minor, core-workflow alpha gate added) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
 Forward-looking: where DeckCraft is going and in what order. The one-page summary is
 [ROADMAP.md](../ROADMAP.md); every shortfall is in [gaps.md](gaps.md); numbers are in
@@ -34,7 +34,7 @@ points and lead the beta plan.
    this repo, media options and rewind on save (#74, #77), relationship-bearing SmartArt and OLE
    (#203), EMF+ records and SVG. 31–55 h.
 3. **Review the open PRs:** equations (#55), browser print (#66), Morph alignment (#67), macOS
-   open-with (#68), font lookup (#80), Ukrainian (#34, after the catalog exists). 4–8 h.
+   open-with (#68), font lookup (#80), Ukrainian (#34; English/Estonian catalog exists, #1066). 4–8 h.
 
 ## Plan to beta (~120–210 h; ~40–70 h wall clock with 3–4 agents)
 
@@ -115,6 +115,7 @@ plan above.
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-10-20 | minor | Estonian interface catalog, persisted System/English/Eesti selection, worker-safe placeholder prompts and et-EE proofing selection (#1066) |
 | 2026-10-18 | minor | Native chart payloads use referenced ZIP members and share media byte/item limits; old inline sidecars remain readable. Synthetic tests cover multi-megabyte layout, all shape owners, shared budgets, missing/corrupt members and invalid references. Scores and milestone scope unchanged |
 | 2026-10-15 | trivial | Native save/reopen retains imported chart workbooks and related parts; headless command tests cover a PPTX → native → PPTX cycle and stale-workbook rejection. Milestone scope and scores unchanged |
 | 2026-10-15 | trivial | PPTX trigger click steps survive save, including by-paragraph builds. Interactive-deck gaps remain media actions, audio triggers and click-box geometry; milestone scope and feature scores unchanged |
