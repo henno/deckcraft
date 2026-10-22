@@ -1,14 +1,15 @@
 # Localization parity with PowerPoint
 
-> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-20 · **Change:** minor (Estonian interface and language selection, #1066; previous: IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
+> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-22 · **Change:** minor (PR #1070 review fixes: missing translations and localization scope; previous: Estonian interface and language selection, #1066; previous: IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
 DeckCraft has English and Estonian interface text. Preferences > Interface language offers
 System language, English and Eesti. The desktop host reads its OS locale; the browser reads
 navigator.language. The selection is stored with the other UI preferences. Unknown messages use
 English fallback. The Estonian catalog covers menus, ribbon labels, dialogs, tooltips, the File
 pages and built-in editor prompts. Document text, custom prompts, paths and command ids are kept.
-Estonian proofreading uses an installed Hunspell dictionary, when available; no dictionary is
-bundled by this change. Native-speaker review and additional runtime messages remain.
+Estonian proofing can use an installed Hunspell dictionary; no dictionary is bundled by this
+change. Without one, `review.spelling` falls back to a small English misspelling list, even for
+`et-EE`; the editor skips spelling underlines for languages without a dictionary. Native-speaker review and additional runtime messages remain.
 Related: #1066; system-language request #15; Ukrainian #30 / PR #34 remains separate.
 The dimension estimate stays **~8% ready** until the target-language assessment is repeated.
 
@@ -57,13 +58,17 @@ the next re-measure.
 ## Proofing languages
 
 PowerPoint checks spelling in dozens of languages and lets each run carry a proofing language.
-DeckCraft keeps `a:rPr/@lang` on round trip but its spelling check is a small English list of
-common misspellings (`crates/engine/src/cmd/review.rs`); see [gaps.md](gaps.md#proofing-spelling-thesaurus-autocorrect).
+DeckCraft keeps `a:rPr/@lang` on round trip. `review.spelling` uses an installed Hunspell
+dictionary for each run language. If none is installed, it checks the small English `COMMON`
+misspelling list for that language too, including `et-EE` (`crates/engine/src/cmd/review.rs`).
+The editor spelling underlines skip languages with no installed dictionary. Thus the command
+fallback does not provide Estonian proofing. See [gaps.md](gaps.md#proofing-spelling-thesaurus-autocorrect).
 
 ## Revision history
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-10-22 | minor | PR #1070 review fixes: missing interface translations, consistent remaining localization scope and explicit proofing fallbacks (#1066) |
 | 2026-10-20 | minor | Estonian interface catalog, persisted System/English/Eesti selection, worker-safe placeholder prompts and et-EE proofing selection (#1066) |
 | 2026-10-14 | minor | IME composition in a table cell is underlined in place; the candidate window sits on that cell's caret |
 | 2026-10-12 | minor | IME composition for Chinese, Japanese and Korean, and interface text in any installed script (#101) |

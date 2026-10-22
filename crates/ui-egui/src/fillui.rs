@@ -168,9 +168,9 @@ pub fn gradient_editor(ui: &mut Ui, id: &str, g: &Gradient, sc: &ColorScheme) ->
     };
     ui.horizontal(|ui| {
         ui.add_sized(vec2(70.0, 20.0), egui::Label::new(crate::i18n::tr("Type")));
-        egui::ComboBox::from_id_salt((id, "kind")).selected_text(kind).width(120.0).show_ui(ui, |ui| {
+        egui::ComboBox::from_id_salt((id, "kind")).selected_text(crate::i18n::tr(kind)).width(120.0).show_ui(ui, |ui| {
             for k in ["Linear", "Radial", "Rectangular", "Path"] {
-                if ui.selectable_label(kind == k, k).clicked() && kind != k {
+                if ui.selectable_label(kind == k, crate::i18n::tr(k)).clicked() && kind != k {
                     let focus = match &g.shape {
                         GradientShape::Path { focus, .. } => *focus,
                         _ => [0.5, 0.5, 0.5, 0.5],
@@ -200,7 +200,7 @@ pub fn gradient_editor(ui: &mut Ui, id: &str, g: &Gradient, sc: &ColorScheme) ->
             GradientShape::Path { path, focus } => {
                 for (l, f) in DIRECTIONS_PATH {
                     let on = focus.iter().zip(f).all(|(a, b)| (a - b).abs() < 1e-3);
-                    if ui.selectable_label(on, l.trim_start_matches("From ")).on_hover_text(crate::i18n::tr(l)).clicked() {
+                    if ui.selectable_label(on, crate::i18n::tr(l.trim_start_matches("From "))).on_hover_text(crate::i18n::tr(l)).clicked() {
                         out = Some(Gradient { shape: GradientShape::Path { path: path.clone(), focus: f }, ..g.clone() });
                     }
                 }

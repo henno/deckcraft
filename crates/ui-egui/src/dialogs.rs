@@ -1247,7 +1247,9 @@ fn body(app: &mut SlideApp, ui: &mut Ui, d: &mut Dialog) -> bool {
         "close" => {
             // File › Close and Ctrl+W on a presentation with unsaved changes.
             let Some(name) = app.session.active().map(|d| d.title()) else { return true };
-            ui.label(egui::RichText::new(format!("Do you want to save the changes you made to “{name}”?")).strong());
+            ui.label(
+                egui::RichText::new(crate::i18n::format("Do you want to save the changes you made to {what}?", &[format!("“{name}”")])).strong(),
+            );
             ui.label(crate::i18n::tr("Your changes will be lost if you don't save them."));
             ui.add_space(8.0);
             let mut done = false;

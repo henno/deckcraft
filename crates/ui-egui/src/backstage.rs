@@ -593,7 +593,7 @@ fn recent_list(app: &mut SlideApp, ui: &mut Ui, query: &str, limit: usize) {
     let list: Vec<String> =
         app.ui.recent.iter().filter(|p| q.is_empty() || split_path(p).0.to_lowercase().contains(&q)).take(limit).cloned().collect();
     if list.is_empty() {
-        dim(ui, &format!("No recent presentations match “{}”.", query.trim()));
+        dim(ui, &crate::i18n::format("No recent presentations match “{}”.", &[query.trim().to_string()]));
         return;
     }
     let width = ui.available_width().min(CONTENT_W);
@@ -769,7 +769,7 @@ fn new_page(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
         false
     };
     if !themes && !templates {
-        dim(ui, &format!("No themes or templates match “{}”.", q.trim()));
+        dim(ui, &crate::i18n::format("No themes or templates match “{}”.", &[q.trim().to_string()]));
     }
 }
 
@@ -943,7 +943,7 @@ fn save_as(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage, out: &mut Outcom
     ui.add_space(14.0);
     let current = SAVE_TYPES.iter().find(|s| s.0 == bs.file_type).map_or(SAVE_TYPES[0].1, |s| s.1);
     ui.horizontal(|ui| {
-        egui::ComboBox::from_id_salt("backstage_save_type").width(340.0).selected_text(current).show_ui(ui, |ui| {
+        egui::ComboBox::from_id_salt("backstage_save_type").width(340.0).selected_text(crate::i18n::tr(current)).show_ui(ui, |ui| {
             for (id, label, _) in SAVE_TYPES {
                 if ui.selectable_label(bs.file_type == id, crate::i18n::tr(label)).clicked() {
                     bs.file_type = id;
@@ -1064,7 +1064,7 @@ fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                 PrintScope::Current => "Print Current Slide",
                 PrintScope::Custom => "Custom Range",
             };
-            egui::ComboBox::from_id_salt("backstage_print_scope").width(240.0).selected_text(scope).show_ui(ui, |ui| {
+            egui::ComboBox::from_id_salt("backstage_print_scope").width(240.0).selected_text(crate::i18n::tr(scope)).show_ui(ui, |ui| {
                 for (s, label) in
                     [(PrintScope::All, "Print All Slides"), (PrintScope::Current, "Print Current Slide"), (PrintScope::Custom, "Custom Range")]
                 {
@@ -1088,7 +1088,7 @@ fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
             });
             ui.add_space(4.0);
             let layout = LAYOUTS.iter().find(|l| l.0 == bs.print_layout).map_or("Full Page Slides", |l| l.1);
-            egui::ComboBox::from_id_salt("backstage_print_layout").width(240.0).selected_text(layout).show_ui(ui, |ui| {
+            egui::ComboBox::from_id_salt("backstage_print_layout").width(240.0).selected_text(crate::i18n::tr(layout)).show_ui(ui, |ui| {
                 for (id, label) in LAYOUTS {
                     if ui.selectable_label(bs.print_layout == id, crate::i18n::tr(label)).clicked() {
                         bs.print_layout = id;
@@ -1101,7 +1101,7 @@ fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
             // for notes pages and handouts.
             ui.add_enabled_ui(bs.print_layout != "slides", |ui| {
                 let paper = deckcraft_engine::cmd::file::PAPERS.iter().find(|p| p.0 == bs.print_paper).map_or("Letter", |p| p.1);
-                egui::ComboBox::from_id_salt("backstage_print_paper").width(240.0).selected_text(paper).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("backstage_print_paper").width(240.0).selected_text(crate::i18n::tr(paper)).show_ui(ui, |ui| {
                     for (id, label, _) in deckcraft_engine::cmd::file::PAPERS {
                         if ui.selectable_label(bs.print_paper == id, crate::i18n::tr(label)).clicked() {
                             bs.print_paper = id;
@@ -1110,7 +1110,7 @@ fn print(app: &mut SlideApp, ui: &mut Ui, bs: &mut Backstage) {
                 });
                 ui.add_space(4.0);
                 let orient = if bs.print_landscape { "Landscape Orientation" } else { "Portrait Orientation" };
-                egui::ComboBox::from_id_salt("backstage_print_orientation").width(240.0).selected_text(orient).show_ui(ui, |ui| {
+                egui::ComboBox::from_id_salt("backstage_print_orientation").width(240.0).selected_text(crate::i18n::tr(orient)).show_ui(ui, |ui| {
                     for (land, label) in [(false, "Portrait Orientation"), (true, "Landscape Orientation")] {
                         if ui.selectable_label(bs.print_landscape == land, crate::i18n::tr(label)).clicked() {
                             bs.print_landscape = land;

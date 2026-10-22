@@ -1,6 +1,6 @@
 # Where DeckCraft falls short of PowerPoint
 
-> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-20 · **Change:** minor (Estonian interface and language selection, #1066; previous: native chart payloads stored in bounded ZIP members; previous: major, community PR wave 2026-10-14: soak tests, PPTX corpus, comment threads (#70), embedded fonts, SmartArt Text Pane, Animation Pane timeline, Hunspell spelling, thesaurus, AutoCorrect, 14 new dialogs, pen pressure and trackpad gestures; duplicated entries and headers folded; previous: minor, 3-D bevel, camera and face lighting rendered) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
+> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-22 · **Change:** minor (PR #1070 review fixes: missing translations and localization scope; previous: Estonian interface and language selection, #1066; previous: native chart payloads stored in bounded ZIP members; previous: major, community PR wave 2026-10-14: soak tests, PPTX corpus, comment threads (#70), embedded fonts, SmartArt Text Pane, Animation Pane timeline, Hunspell spelling, thesaurus, AutoCorrect, 14 new dialogs, pen pressure and trackpad gestures; duplicated entries and headers folded; previous: minor, 3-D bevel, camera and face lighting rendered) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
 Every known shortfall, one entry each, ranked by how much it stops someone who presents with
 PowerPoint from switching. This is the work list: pick from the top. Numbers are summarized in
@@ -21,7 +21,7 @@ revision history.
 | 2 | Data loss and crashes on common paths (#60, #40, #59) | Stability | B | 6–12 | this file |
 | 3 | PPTX round trip drops media options and rewind (#74, #77) | File format | B | 2–4 | [file-format-parity.md](file-format-parity.md) |
 | 4 | SVG pictures don't render (EMF/WMF do) | File format | B | 4–8 | [file-format-parity.md](file-format-parity.md) |
-| 5 | Localization: remaining target languages | Localization | B (infra + 5 languages) | 55–90 | [localization-parity.md](localization-parity.md) |
+| 5 | Localization: remaining runtime messages + zh-Hans, es, fr, de, ja | Localization | B (5 languages) | 27–46 | [localization-parity.md](localization-parity.md) |
 | 6 | No printing | Feature | B | 5–8 | [file-format-parity.md](file-format-parity.md) |
 | 7 | Fonts: only Regular, Bold and Italic faces (#69) | Feature | B | 3–5 | [ui-parity.md](ui-parity.md) |
 | 8 | Image paste fails on Windows and Linux (#53) | Feature | B | 2–4 | [ui-parity.md](ui-parity.md) |
@@ -357,6 +357,7 @@ Detail in [localization-parity.md](localization-parity.md).
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-10-22 | minor | PR #1070 review fixes: missing interface translations, consistent remaining localization scope and explicit proofing fallbacks (#1066) |
 | 2026-10-20 | minor | Estonian interface catalog, persisted System/English/Eesti selection, worker-safe placeholder prompts and et-EE proofing selection (#1066) |
 | 2026-10-18 | minor | Native chart payloads use referenced ZIP members and share media byte/item limits; old inline sidecars remain readable. Synthetic tests cover multi-megabyte layout, all shape owners, shared budgets, missing/corrupt members and invalid references. Scores and milestone scope unchanged |
 | 2026-10-15 | trivial | Native saves retain chart package parts and relationships, including charts in groups; edited chart data still does not export a stale source workbook. Chart editing gaps and scores remain unchanged |

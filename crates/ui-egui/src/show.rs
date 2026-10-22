@@ -983,7 +983,8 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.rect_filled(bar, CornerRadius::same(17), Color32::from_black_alpha(140));
         let mut child =
             ui.new_child(egui::UiBuilder::new().max_rect(bar.shrink2(vec2(10.0, 4.0))).layout(egui::Layout::left_to_right(egui::Align::Center)));
-        let b = |ui: &mut Ui, s: &str| ui.add(egui::Button::new(egui::RichText::new(s).color(Color32::WHITE).size(15.0)).frame(false));
+        let b =
+            |ui: &mut Ui, s: &str| ui.add(egui::Button::new(egui::RichText::new(crate::i18n::tr(s)).color(Color32::WHITE).size(15.0)).frame(false));
         if b(&mut child, "◀").clicked() {
             let a = show.state.prev(&doc);
             show.apply(a, &doc, now);
@@ -1670,7 +1671,7 @@ fn paint_grid(painter: &egui::Painter, ctx: &egui::Context, show: &mut Show, doc
     let aspect = slide_aspect(doc);
     let cells = see_all_cells(full, slides.len(), aspect);
     painter.rect_filled(full, CornerRadius::ZERO, Color32::from_gray(16));
-    painter.text(pos2(full.center().x, full.min.y + 28.0), Align2::CENTER_CENTER, "All slides", theme::font(20.0), Color32::WHITE);
+    painter.text(pos2(full.center().x, full.min.y + 28.0), Align2::CENTER_CENTER, crate::i18n::tr("All slides"), theme::font(20.0), Color32::WHITE);
     if doc.slides.len() > GRID_CAP {
         painter.text(
             pos2(full.center().x, full.min.y + 50.0),
@@ -1760,7 +1761,11 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
     let mut actions = vec![];
     // The presenter window is dark; default buttons draw dark text on it (#221).
     let button = |ui: &mut Ui, s: &str| {
-        ui.add(egui::Button::new(egui::RichText::new(s).size(15.0).color(Color32::WHITE)).fill(Color32::from_gray(60)).min_size(vec2(0.0, 30.0)))
+        ui.add(
+            egui::Button::new(egui::RichText::new(crate::i18n::tr(s)).size(15.0).color(Color32::WHITE))
+                .fill(Color32::from_gray(60))
+                .min_size(vec2(0.0, 30.0)),
+        )
     };
     ctx.show_viewport_immediate(
         egui::ViewportId::from_hash_of("deckcraft_presenter"),
@@ -1879,7 +1884,9 @@ fn presenter_window(ctx: &egui::Context, show: &mut Show, doc: &Presentation, no
                 let mut child = ui.new_child(egui::UiBuilder::new().max_rect(notes_rect));
                 egui::ScrollArea::vertical().show(&mut child, |ui| {
                     ui.label(
-                        egui::RichText::new(if notes.is_empty() { "No notes." } else { &notes }).size(show.notes_px).color(Color32::from_gray(230)),
+                        egui::RichText::new(if notes.is_empty() { crate::i18n::tr("No notes.") } else { &notes })
+                            .size(show.notes_px)
+                            .color(Color32::from_gray(230)),
                     );
                 });
             });
@@ -1925,6 +1932,45 @@ mod tests {
         assert_eq!(harness.output().platform_output.cursor_icon, egui::CursorIcon::PointingHand);
         harness.run_steps(12);
         assert_eq!(harness.output().platform_output.cursor_icon, egui::CursorIcon::None, "still for 3 s: hidden");
+    }
+
+    #[test]
+    fn estonian_presenter_controls_keep_timer_and_navigation_actions() {
+        use egui_kittest::kittest::Queryable;
+        crate::i18n::set_current(crate::i18n::Language::Et);
+        let mut session = deckcraft_engine::Session::with_new();
+        session.execute("slide.new", &json!({})).unwrap();
+        let doc = session.active().unwrap().doc.clone();
+        let show = Show::new(&doc, 0, false, true);
+        let mut h = egui_kittest::Harness::builder().with_size(vec2(1100.0, 700.0)).build_ui_state(
+            |ui, (doc, show, keep): &mut (std::sync::Arc<Presentation>, Show, bool)| {
+                let now = ui.input(|i| i.time);
+                presenter_window(ui.ctx(), show, doc, now, keep);
+            },
+            (doc, show, true),
+        );
+        h.run_steps(3);
+        h.get_by_label("Järgmine ▶").click();
+        h.run_steps(2);
+        assert_eq!(h.state().1.state.slide, 1);
+        h.get_by_label("◀ Eelmine").click();
+        h.run_steps(2);
+        assert_eq!(h.state().1.state.slide, 0);
+        h.get_by_label("Peata").click();
+        h.run_steps(2);
+        assert!(h.state().1.timer.paused());
+        assert!(h.query_by_label("Jätka").is_some());
+        h.get_by_label("Lähtesta").click();
+        h.run_steps(2);
+        assert_eq!(h.state().1.timer.elapsed(100.0), 0.0);
+        if let Ok(dir) = std::env::var("DECKCRAFT_I18N_SHOTS") {
+            std::fs::create_dir_all(&dir).unwrap();
+            h.render().unwrap().save(format!("{dir}/et-presenter.png")).unwrap();
+        }
+        h.get_by_label("Lõpeta seanss").click();
+        h.run_steps(2);
+        assert!(!h.state().2);
+        crate::i18n::set_current(crate::i18n::Language::En);
     }
 
     /// Send real egui key events to the presenter UI, without the audience window's handler.

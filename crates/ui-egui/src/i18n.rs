@@ -158,6 +158,8 @@ mod tests {
         required.extend(deckcraft_model::anim::TRANSITIONS.iter().flat_map(|effect| [effect.1, effect.2]));
         required.extend(deckcraft_model::chart::ChartType::MAIN.iter().map(|kind| kind.label()));
         required.extend(deckcraft_model::defaults::SLIDE_SIZES.iter().map(|size| size.0));
+        required.extend(deckcraft_engine::cmd::file::PAPERS.iter().map(|paper| paper.1));
+        required.extend(crate::backstage::SAVE_TYPES.iter().map(|kind| kind.1));
         required.extend(deckcraft_color::STANDARD_COLORS.iter().map(|color| color.1));
         required.extend(deckcraft_color::SchemeSlot::THEME.iter().map(|slot| slot.label()));
         required.extend(["@ribbon:Home", "@ribbon:Insert"]);
@@ -305,6 +307,87 @@ mod tests {
         set_current(Language::En);
         assert_eq!(tr("File"), "File");
         assert_eq!(count(2, "slides", "slaid", "slaidi"), "2 slides");
+    }
+
+    #[test]
+    fn estonian_gradient_direction_updates_the_original_geometry() {
+        use deckcraft_model::style::GradientShape;
+        use egui_kittest::kittest::Queryable;
+        set_current(Language::Et);
+        let mut gradient = crate::fillui::default_gradient(deckcraft_model::ColorRef::scheme(deckcraft_color::SchemeSlot::Accent1), 90.0);
+        gradient.shape = GradientShape::Path { path: "circle".into(), focus: [0.5; 4] };
+        let scheme = deckcraft_color::ColorScheme { name: "Test".into(), colors: [deckcraft_color::Rgba::BLACK; 12] };
+        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(900.0, 700.0)).build_ui_state(
+            move |ui, gradient| {
+                if let Some(next) = crate::fillui::gradient_editor(ui, "review-gradient", gradient, &scheme) {
+                    *gradient = next;
+                }
+            },
+            gradient,
+        );
+        h.run_steps(3);
+        for label in ["keskel", "ülal vasakul", "ülal paremal", "all vasakul", "all paremal"] {
+            assert!(h.query_by_label(label).is_some());
+        }
+        h.get_by_label("ülal vasakul").click();
+        h.run_steps(2);
+        assert!(matches!(&h.state().shape, GradientShape::Path { path, focus } if path == "circle" && *focus == [0.0, 0.0, 1.0, 1.0]));
+        if let Ok(dir) = std::env::var("DECKCRAFT_I18N_SHOTS") {
+            std::fs::create_dir_all(&dir).unwrap();
+            h.render().unwrap().save(format!("{dir}/et-gradient.png")).unwrap();
+        }
+        set_current(Language::En);
+    }
+
+    #[test]
+    fn estonian_reviewed_file_pages_and_close_dialog() {
+        use egui_kittest::kittest::Queryable;
+        let mut app = crate::SlideApp::new(deckcraft_engine::Session::with_new(), crate::Services::default());
+        app.run("app.language", serde_json::json!({"language": "et"})).unwrap();
+        let mut h = egui_kittest::Harness::builder().with_size(egui::vec2(1440.0, 1000.0)).build_ui_state(
+            |ui, app: &mut crate::SlideApp| {
+                app.logic(ui.ctx());
+                app.ui(ui);
+            },
+            app,
+        );
+        for (page, labels) in [
+            ("saveAs", vec![tr("DeckCraft Presentation (*.deckcraft)")]),
+            ("print", vec![tr("Print All Slides"), tr("Full Page Slides"), tr("Portrait Orientation"), tr("Letter (8.5 × 11 in)")]),
+        ] {
+            h.state_mut().run("app.backstage", serde_json::json!({"page": page})).unwrap();
+            if page == "saveAs" {
+                h.state_mut().backstage.as_mut().unwrap().file_type = "deckcraft";
+            }
+            h.run_steps(3);
+            if let Ok(dir) = std::env::var("DECKCRAFT_I18N_SHOTS") {
+                std::fs::create_dir_all(&dir).unwrap();
+                h.render().unwrap().save(format!("{dir}/et-{page}.png")).unwrap();
+            }
+            for label in labels {
+                assert!(h.query_by_value(label).is_some(), "missing selected option: {label}");
+            }
+        }
+        h.state_mut().ui.recent = vec!["/tmp/Review.pptx".into()];
+        for (page, source) in [("open", "No recent presentations match “{}”."), ("new", "No themes or templates match “{}”.")] {
+            h.state_mut().run("app.backstage", serde_json::json!({"page": page})).unwrap();
+            let query = "ÕÄÖÜ {customer}".to_string();
+            h.state_mut().backstage.as_mut().unwrap().query = query.clone();
+            h.run_steps(3);
+            assert!(h.query_by_label(&format(source, &[query])).is_some());
+        }
+        h.state_mut().backstage = None;
+        h.state_mut().run("insert.textBox", serde_json::json!({"text": "ÕÄÖÜ {customer}", "rect": [1, 2, 100, 40]})).unwrap();
+        let title = h.state().session.active().unwrap().title();
+        h.state_mut().close_presentation();
+        h.run_steps(3);
+        let question = format("Do you want to save the changes you made to {what}?", &[format!("“{title}”")]);
+        assert!(h.query_by_label(&question).is_some());
+        h.get_by_label(tr("Cancel")).click();
+        h.run_steps(2);
+        assert!(h.state().session.active().unwrap().is_dirty());
+        assert!(h.state().dialog.is_none());
+        set_current(Language::En);
     }
 
     #[test]
