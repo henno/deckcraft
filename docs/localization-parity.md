@@ -1,6 +1,6 @@
 # Localization parity with PowerPoint
 
-> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-22 · **Change:** minor (PR #1070 review fixes: missing translations and localization scope; previous: Estonian interface and language selection, #1066; previous: IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
+> **Last reviewed:** 2026-10-14 · **Last updated:** 2026-10-23 · **Change:** minor (translated slideshow overlays and retryable browser language persistence, #1066; previous: PR #1070 review fixes: missing translations and localization scope; previous: Estonian interface and language selection, #1066; previous: IME composition underlined in table cells; previous: minor, IME composition and CJK interface text, #101; previous: major, created) · **Target:** Microsoft PowerPoint for Mac 16.113 (Microsoft 365)
 
 DeckCraft has English and Estonian interface text. Preferences > Interface language offers
 System language, English and Eesti. The desktop host reads its OS locale; the browser reads
@@ -68,6 +68,7 @@ fallback does not provide Estonian proofing. See [gaps.md](gaps.md#proofing-spel
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-10-23 | minor | Translate slideshow overlays and keep failed browser language writes eligible for retry (#1066, PR #1070) |
 | 2026-10-22 | minor | PR #1070 review fixes: missing interface translations, consistent remaining localization scope and explicit proofing fallbacks (#1066) |
 | 2026-10-20 | minor | Estonian interface catalog, persisted System/English/Eesti selection, worker-safe placeholder prompts and et-EE proofing selection (#1066) |
 | 2026-10-14 | minor | IME composition in a table cell is underlined in place; the candidate window sits on that cell's caret |

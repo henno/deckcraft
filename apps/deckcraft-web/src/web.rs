@@ -120,10 +120,11 @@ impl eframe::App for WebShell {
         self.app.ui(ui);
         let language = self.app.ui.interface_language;
         if language != self.saved_language {
-            if let (Some(storage), Ok(json)) = (browser_storage(), serde_json::to_string(&language)) {
-                let _ = storage.set_item(LANGUAGE_KEY, &json);
+            if let (Some(storage), Ok(json)) = (browser_storage(), serde_json::to_string(&language))
+                && storage.set_item(LANGUAGE_KEY, &json).is_ok()
+            {
+                self.saved_language = language;
             }
-            self.saved_language = language;
         }
     }
 }

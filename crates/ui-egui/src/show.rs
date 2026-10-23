@@ -892,7 +892,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.rect_filled(full, CornerRadius::ZERO, c);
     }
     if !show.goto.is_empty() {
-        let label = format!("Go to slide {}", show.goto);
+        let label = crate::i18n::format("Go to slide {}", std::slice::from_ref(&show.goto));
         let w = (28.0 + label.len() as f32 * 10.0).clamp(160.0, full.width() - 32.0);
         let r = Rect::from_min_size(pos2(full.min.x + 16.0, full.max.y - 96.0), vec2(w, 36.0));
         painter.rect_filled(r, CornerRadius::same(6), Color32::from_black_alpha(190));
@@ -944,7 +944,7 @@ pub fn ui(app: &mut SlideApp, ui: &mut Ui) {
         painter.text(
             pos2(full.center().x, full.min.y + 36.0),
             Align2::CENTER_CENTER,
-            "Click the slide to zoom in. Esc cancels.",
+            crate::i18n::tr("Click the slide to zoom in. Esc cancels."),
             theme::font(16.0),
             Color32::WHITE,
         );
@@ -1676,7 +1676,7 @@ fn paint_grid(painter: &egui::Painter, ctx: &egui::Context, show: &mut Show, doc
         painter.text(
             pos2(full.center().x, full.min.y + 50.0),
             Align2::CENTER_CENTER,
-            format!("First {GRID_CAP} slides"),
+            crate::i18n::format("First {} slides", &[GRID_CAP.to_string()]),
             theme::font(13.0),
             Color32::from_gray(180),
         );
@@ -1707,7 +1707,7 @@ fn paint_grid(painter: &egui::Painter, ctx: &egui::Context, show: &mut Show, doc
             egui::StrokeKind::Inside,
         );
         let hidden = doc.slides.get(i).is_some_and(|s| s.hidden);
-        let label = if hidden { format!("{}  Hidden", i + 1) } else { format!("{}", i + 1) };
+        let label = if hidden { crate::i18n::format("{}  Hidden", &[(i + 1).to_string()]) } else { format!("{}", i + 1) };
         painter.text(
             pos2(rect.center().x, rect.max.y + 12.0),
             Align2::CENTER_CENTER,
@@ -1932,6 +1932,55 @@ mod tests {
         assert_eq!(harness.output().platform_output.cursor_icon, egui::CursorIcon::PointingHand);
         harness.run_steps(12);
         assert_eq!(harness.output().platform_output.cursor_icon, egui::CursorIcon::None, "still for 3 s: hidden");
+    }
+
+    #[test]
+    fn estonian_slideshow_overlays_preserve_slide_numbers() {
+        fn has_text(output: &egui::FullOutput, expected: &str) -> bool {
+            output.shapes.iter().any(|s| matches!(&s.shape, egui::Shape::Text(t) if t.galley.text() == expected))
+        }
+        let mut app = SlideApp::new(deckcraft_engine::Session::with_new(), crate::Services::default());
+        app.run("app.language", json!({"language": "et"})).unwrap();
+        app.ui.presenter_view = false;
+        let mut h = egui_kittest::Harness::builder().with_size(vec2(1000.0, 700.0)).build_ui_state(
+            |ui, app: &mut SlideApp| {
+                app.logic(ui.ctx());
+                app.ui(ui);
+            },
+            app,
+        );
+        h.run_steps(3);
+        h.state_mut().start_show(0, false);
+        h.key_press(egui::Key::Num1);
+        h.key_press(egui::Key::Num2);
+        h.run_steps(2);
+        assert!(has_text(h.output(), "Mine slaidile 12"));
+        assert_eq!(h.state().show.as_ref().unwrap().goto, "12");
+        h.state_mut().show.as_mut().unwrap().zoom_arm = true;
+        h.run_steps(2);
+        assert!(has_text(h.output(), "Suurendamiseks klõpsa slaidil. Esc tühistab."));
+        if let Ok(dir) = std::env::var("DECKCRAFT_I18N_SHOTS") {
+            std::fs::create_dir_all(&dir).unwrap();
+            h.render().unwrap().save(format!("{dir}/et-slideshow-overlays.png")).unwrap();
+        }
+        let mut doc = (*h.state().session.active().unwrap().doc).clone();
+        doc.slides.resize(GRID_CAP + 1, doc.slides[0].clone());
+        std::sync::Arc::make_mut(&mut doc.slides[0]).hidden = true;
+        let show = Show::new(&doc, 0, false, false);
+        let mut grid = egui_kittest::Harness::builder().with_size(vec2(1000.0, 700.0)).build_ui_state(
+            move |ui, show| {
+                paint_grid(ui.painter(), ui.ctx(), show, &doc, ui.max_rect());
+            },
+            show,
+        );
+        grid.run_steps(2);
+        assert!(has_text(grid.output(), "Esimesed 48 slaidi"));
+        assert!(has_text(grid.output(), "1  Peidetud"));
+        assert_eq!(grid.state().state.slide, 0);
+        if let Ok(dir) = std::env::var("DECKCRAFT_I18N_SHOTS") {
+            grid.render().unwrap().save(format!("{dir}/et-slideshow-grid.png")).unwrap();
+        }
+        crate::i18n::set_current(crate::i18n::Language::En);
     }
 
     #[test]
